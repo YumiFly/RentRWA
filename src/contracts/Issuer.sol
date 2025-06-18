@@ -19,6 +19,7 @@ contract Issuer is FunctionsClient, FunctionsSource, OwnerIsCreator {
 
     struct FractionalizedNft {
         address to;
+        string rwaKey;
         uint256 amount;
     }
 
@@ -26,25 +27,32 @@ contract Issuer is FunctionsClient, FunctionsSource, OwnerIsCreator {
 
     bytes32 internal s_lastRequestId;
     uint256 private s_nextTokenId;
+    uint64 public subscriptionId;
+    uint32 public gasLimit;
+    bytes32 public donID;
 
     mapping(bytes32 requestId => FractionalizedNft) internal s_issuesInProgress;
 
-    constructor(address realEstateToken, address functionsRouterAddress) FunctionsClient(functionsRouterAddress) {
+    constructor(address realEstateToken, address functionsRouterAddress, uint64 _subscriptionId, uint32 _gasLimit, bytes32 _donID) FunctionsClient(functionsRouterAddress) {
+        subscriptionId = _subscriptionId;
+        gasLimit = _gasLimit;
+        donID = _donID;
         i_realRentToken = RealRentToken(realEstateToken);
     }
 
-    function issue(address to, uint256 amount, uint64 subscriptionId, uint32 gasLimit, bytes32 donID)
+    function issue(address to, string calldata rwaKey)
         external
-        onlyOwner
         returns (bytes32 requestId)
     {
         if (s_lastRequestId != bytes32(0)) revert LatestIssueInProgress();
 
         FunctionsRequest.Request memory req;
-        req.initializeRequestForInlineJavaScript(this.getNftMetadata());
+        req.initializeRequestForInlineJavaScript(this.getRentRWAInfo());
+        if (args.length > 0) req.setArgs(args);
+        
         requestId = _sendRequest(req.encodeCBOR(), subscriptionId, gasLimit, donID);
 
-        s_issuesInProgress[requestId] = FractionalizedNft(to, amount);
+        s_issuesInProgress[requestId] = FractionalizedNft(to, rwaKey, 0);
 
         s_lastRequestId = requestId;
     }

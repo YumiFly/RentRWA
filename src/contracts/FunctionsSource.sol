@@ -7,7 +7,7 @@ pragma solidity ^0.8.0;
  * DO NOT USE THIS CODE IN PRODUCTION.
  */
 abstract contract FunctionsSource {
-    string public getNftMetadata =
+    string public getRentRWAInfo =
         "const { ethers } = await import('npm:ethers@6.10.0');"
         "const Hash = await import('npm:ipfs-only-hash@4.0.0');"
         "const apiResponse = await Functions.makeHttpRequest({"
