@@ -12,7 +12,7 @@ import {FunctionsSource} from "./FunctionsSource.sol";
  * THIS IS AN EXAMPLE CONTRACT THAT USES UN-AUDITED CODE.
  * DO NOT USE THIS CODE IN PRODUCTION.
  */
-contract Issuer is FunctionsClient, FunctionsSource, OwnerIsCreator {
+contract RentIssuer is FunctionsClient, FunctionsSource, OwnerIsCreator {
     using FunctionsRequest for FunctionsRequest.Request;
 
     error LatestIssueInProgress();
@@ -27,9 +27,10 @@ contract Issuer is FunctionsClient, FunctionsSource, OwnerIsCreator {
 
     bytes32 internal s_lastRequestId;
     uint256 private s_nextTokenId;
-    uint64 public subscriptionId;
-    uint32 public gasLimit;
-    bytes32 public donID;
+    uint64 private subscriptionId;
+    uint32 private gasLimit;
+    bytes32 private donID;
+    AggregatorV3Interface internal immutable dataFeed;
 
     mapping(bytes32 requestId => FractionalizedNft) internal s_issuesInProgress;
 
@@ -67,8 +68,9 @@ contract Issuer is FunctionsClient, FunctionsSource, OwnerIsCreator {
         }
 
         if (s_lastRequestId == requestId) {
-            string memory tokenURI = string(response);
+            (uint256 deadlineTime, uint256 price) = abi.decode(response, (uint256, uint256));
 
+            s_issuesInProgress[requestId].amount = price;
             uint256 tokenId = s_nextTokenId++;
             FractionalizedNft memory fractionalizedNft = s_issuesInProgress[requestId];
 
