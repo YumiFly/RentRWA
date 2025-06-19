@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.24;
 
-import {RealEstateToken} from "../RealEstateToken.sol";
+import {RealRentToken} from "./RealRentToken.sol";
 import {IERC1155Receiver, IERC165} from "@openzeppelin/contracts/token/ERC1155/IERC1155Receiver.sol";
 import {OwnerIsCreator} from "@chainlink/contracts-ccip/src/v0.8/shared/access/OwnerIsCreator.sol";
 import {ReentrancyGuard} from "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
@@ -20,115 +20,112 @@ contract RentLending is IERC1155Receiver, OwnerIsCreator, ReentrancyGuard {
 
     struct LoanDetails {
         uint256 erc1155AmountSupplied;
+        uint256 usdcAmountSupplied;
         uint256 usdcAmountLoaned;
-        uint256 usdcLiquidationThreshold;
+        address owner;
+        address[] usdcLenders;
+        mapping(address usdcLender => uint256)  usdcLendersDetails;
     }
 
-    RealEstateToken internal immutable i_realEstateToken;
+    RealRentToken internal immutable i_realRentToken;
     address internal immutable i_usdc;
     AggregatorV3Interface internal s_usdcUsdAggregator;
     uint32 internal s_usdcUsdFeedHeartbeat;
 
-    uint256 internal immutable i_weightListPrice;
-    uint256 internal immutable i_weightOriginalListPrice;
-    uint256 internal immutable i_weightTaxAssessedValue;
-    uint256 internal immutable i_ltvInitialThreshold;
-    uint256 internal immutable i_ltvLiquidationThreshold;
+    mapping(uint256 tokenId => LoanDetails) internal s_activeLoans;
 
-    mapping(uint256 tokenId => mapping(address borrower => LoanDetails)) internal s_activeLoans;
 
-    event Borrow(
-        uint256 indexed tokenId, uint256 amount, uint256 indexed loanAmount, uint256 indexed liquidationThreshold
-    );
-    event BorrowRepayed(uint256 indexed tokenId, uint256 indexed amount);
-    event Liquidated(uint256 indexed tokenId);
+    event LendRWA(uint256 indexed tokenId, uint256 amountRwa, uint256 amountUsdc);
+    event Repayed(uint256 indexed tokenId, uint256 amount);
+    event LendUSDC(uint256 indexed tokenId, uint256 amount);
 
     error AlreadyBorrowed(address borrower, uint256 tokenId);
-    error OnlyRealEstateTokenSupported();
-    error InvalidValuation();
+    error OnlyRealRentTokenSupported();
+    error InvalidValue();
     error SlippageToleranceExceeded();
     error PriceFeedDdosed();
     error InvalidRoundId();
     error StalePriceFeed();
-    error NothingToRepay();
 
     constructor(
-        address realEstateTokenAddress,
+        address realRentTokenAddress,
         address usdc,
         address usdcUsdAggregatorAddress,
         uint32 usdcUsdFeedHeartbeat
     ) {
-        i_realEstateToken = RealEstateToken(realEstateTokenAddress);
+        i_realRentToken = RealRentToken(realRentTokenAddress);
         i_usdc = usdc;
         s_usdcUsdAggregator = AggregatorV3Interface(usdcUsdAggregatorAddress);
         s_usdcUsdFeedHeartbeat = usdcUsdFeedHeartbeat;
-
-        i_weightListPrice = 50;
-        i_weightOriginalListPrice = 30;
-        i_weightTaxAssessedValue = 20;
-
-        i_ltvInitialThreshold = 60;
-        i_ltvLiquidationThreshold = 75;
     }
 
-    function borrow(
+    function lendRWA(
         uint256 tokenId,
-        uint256 amount,
-        bytes memory data,
-        uint256 minLoanAmount,
-        uint256 maxLiquidationThreshold
+        uint256 amountRwa,
+        bytes memory data
     ) external nonReentrant {
-        if (s_activeLoans[tokenId][msg.sender].usdcAmountLoaned != 0) revert AlreadyBorrowed(msg.sender, tokenId);
+        if (s_activeLoans[tokenId].usdcAmountLoaned != 0) revert AlreadyBorrowed(msg.sender, tokenId);
 
-        uint256 normalizedValuation = getValuationInUsdc(tokenId) * amount / i_realEstateToken.totalSupply(tokenId);
-
-        if (normalizedValuation == 0) revert InvalidValuation();
-
-        uint256 loanAmount = (normalizedValuation * i_ltvInitialThreshold) / 100;
-        if (loanAmount < minLoanAmount) revert SlippageToleranceExceeded();
-
-        uint256 liquidationThreshold = (normalizedValuation * i_ltvLiquidationThreshold) / 100;
-        if (liquidationThreshold > maxLiquidationThreshold) {
+        // 判断输入的 amountUsd 是否合理
+        if (amountRwa > i_realRentToken.totalSupply(tokenId) || amountRwa == 0) {
             revert SlippageToleranceExceeded();
         }
 
-        i_realEstateToken.safeTransferFrom(msg.sender, address(this), tokenId, amount, data);
+        uint256 amountUsdc = getValuationInUsdc(amountRwa);
 
-        s_activeLoans[tokenId][msg.sender] = LoanDetails({
-            erc1155AmountSupplied: amount,
-            usdcAmountLoaned: loanAmount,
-            usdcLiquidationThreshold: liquidationThreshold
-        });
+        if (amountUsdc == 0) revert InvalidValue();
 
-        IERC20(i_usdc).safeTransfer(msg.sender, loanAmount);
+        // rwa owner 出借 rwa token
+        i_realRentToken.safeTransferFrom(msg.sender, address(this), tokenId, amountRwa, data);
 
-        emit Borrow(tokenId, amount, loanAmount, liquidationThreshold);
+        // 记录 rwa token 出借信息
+        s_activeLoans[tokenId].erc1155AmountSupplied = amountRwa;
+        s_activeLoans[tokenId].usdcAmountLoaned = amountUsdc;
+        s_activeLoans[tokenId].owner = msg.sender;
+
+        emit LendRWA(tokenId, amountRwa, amountUsdc);
+    }
+
+    function lendUSDC(
+        uint256 tokenId,
+        uint256 amount
+    ) external nonReentrant {
+        
+        if (amount == 0 || amount > s_activeLoans[tokenId].usdcAmountLoaned) {
+            revert SlippageToleranceExceeded();
+        }
+
+        // 更新贷款信息，记录 usdc token 出借信息
+        s_activeLoans[tokenId].usdcAmountLoaned -= amount;
+        s_activeLoans[tokenId].usdcLenders.push(msg.sender);
+        s_activeLoans[tokenId].usdcLendersDetails[msg.sender] += amount;
+        address to = s_activeLoans[tokenId].owner;
+
+        // ERC20转账需要发送给 rwa owner
+        IERC20(i_usdc).safeTransferFrom(msg.sender, to, amount);
+
+        emit LendUSDC(tokenId, amount);
     }
 
     function repay(uint256 tokenId) external nonReentrant {
-        LoanDetails memory loanDetails = s_activeLoans[tokenId][msg.sender];
-        if (loanDetails.usdcAmountLoaned == 0) revert NothingToRepay();
+        
+        if( s_activeLoans[tokenId].owner != msg.sender) revert InvalidValue();
+        
+        for (uint256 i = 0; i < s_activeLoans[tokenId].usdcLenders.length; i++) {
+            address usdcLender = s_activeLoans[tokenId].usdcLenders[i];
+            uint256 usdcAmount = s_activeLoans[tokenId].usdcLendersDetails[usdcLender];
 
-        delete s_activeLoans[tokenId][msg.sender];
-
-        IERC20(i_usdc).safeTransferFrom(msg.sender, address(this), loanDetails.usdcAmountLoaned);
-
-        i_realEstateToken.safeTransferFrom(address(this), msg.sender, tokenId, loanDetails.erc1155AmountSupplied, "");
-
-        emit BorrowRepayed(tokenId, loanDetails.erc1155AmountSupplied);
-    }
-
-    function liquidate(uint256 tokenId, address borrower) external {
-        LoanDetails memory loanDetails = s_activeLoans[tokenId][borrower];
-
-        uint256 normalizedValuation =
-            getValuationInUsdc(tokenId) * loanDetails.erc1155AmountSupplied / i_realEstateToken.totalSupply(tokenId);
-        if (normalizedValuation == 0) revert InvalidValuation();
-
-        uint256 liquidationThreshold = (normalizedValuation * i_ltvLiquidationThreshold) / 100;
-        if (liquidationThreshold < loanDetails.usdcLiquidationThreshold) {
-            delete s_activeLoans[tokenId][borrower];
+            if (usdcAmount > 0) {
+                // 退还 ERC20 给 usdc lender
+                IERC20(i_usdc).safeTransfer(usdcLender, usdcAmount);
+            }
         }
+        // 取走 ERC1155
+        i_realRentToken.safeTransferFrom(address(this), msg.sender, tokenId, s_activeLoans[tokenId].erc1155AmountSupplied, "");
+
+        // 触发事件
+        emit Repayed(tokenId, s_activeLoans[tokenId].erc1155AmountSupplied);
+        delete s_activeLoans[tokenId];
     }
 
     function getUsdcPriceInUsd() public view returns (uint256) {
@@ -159,20 +156,13 @@ contract RentLending is IERC1155Receiver, OwnerIsCreator, ReentrancyGuard {
         return uint256(_price);
     }
 
-    function getValuationInUsdc(uint256 tokenId) public view returns (uint256) {
-        RealEstateToken.PriceDetails memory priceDetails = i_realEstateToken.getPriceDetails(tokenId);
-
-        uint256 valuation = (
-            i_weightListPrice * priceDetails.listPrice + i_weightOriginalListPrice * priceDetails.originalListPrice
-                + i_weightTaxAssessedValue * priceDetails.taxAssessedValue
-        ) / (i_weightListPrice + i_weightOriginalListPrice + i_weightTaxAssessedValue);
-
+    function getValuationInUsdc(uint256 amountUsd) public view returns (uint256) {
         uint256 usdcPriceInUsd = getUsdcPriceInUsd();
 
         uint256 feedDecimals = s_usdcUsdAggregator.decimals();
         uint256 usdcDecimals = 6; // USDC uses 6 decimals
 
-        uint256 normalizedValuation = Math.mulDiv((valuation * usdcPriceInUsd), 10 ** usdcDecimals, 10 ** feedDecimals); // Adjust the valuation from USD (Chainlink 1e8) to USDC (1e6)
+        uint256 normalizedValuation = Math.mulDiv((amountUsd * usdcPriceInUsd), 10 ** usdcDecimals, 10 ** feedDecimals); // Adjust the valuation from USD (Chainlink 1e8) to USDC (1e6)
 
         return normalizedValuation;
     }
@@ -192,8 +182,8 @@ contract RentLending is IERC1155Receiver, OwnerIsCreator, ReentrancyGuard {
         uint256, /*value*/
         bytes calldata /*data*/
     ) external view returns (bytes4) {
-        if (msg.sender != address(i_realEstateToken)) {
-            revert OnlyRealEstateTokenSupported();
+        if (msg.sender != address(i_realRentToken)) {
+            revert OnlyRealRentTokenSupported();
         }
 
         return IERC1155Receiver.onERC1155Received.selector;
@@ -206,8 +196,8 @@ contract RentLending is IERC1155Receiver, OwnerIsCreator, ReentrancyGuard {
         uint256[] calldata, /*values*/
         bytes calldata /*data*/
     ) external view returns (bytes4) {
-        if (msg.sender != address(i_realEstateToken)) {
-            revert OnlyRealEstateTokenSupported();
+        if (msg.sender != address(i_realRentToken)) {
+            revert OnlyRealRentTokenSupported();
         }
 
         return IERC1155Receiver.onERC1155BatchReceived.selector;

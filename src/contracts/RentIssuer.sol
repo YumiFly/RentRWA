@@ -21,6 +21,7 @@ contract RentIssuer is FunctionsClient, FunctionsSource, OwnerIsCreator {
         address to;
         string rwaKey;
         uint256 amount;
+        uint256 deadline;
     }
 
     RealRentToken internal immutable i_realRentToken;
@@ -30,7 +31,7 @@ contract RentIssuer is FunctionsClient, FunctionsSource, OwnerIsCreator {
     uint64 private subscriptionId;
     uint32 private gasLimit;
     bytes32 private donID;
-    AggregatorV3Interface internal immutable dataFeed;
+
 
     mapping(bytes32 requestId => FractionalizedNft) internal s_issuesInProgress;
 
@@ -41,7 +42,7 @@ contract RentIssuer is FunctionsClient, FunctionsSource, OwnerIsCreator {
         i_realRentToken = RealRentToken(realEstateToken);
     }
 
-    function issue(address to, string calldata rwaKey)
+    function issue(address to, string[] calldata args)
         external
         returns (bytes32 requestId)
     {
@@ -49,11 +50,13 @@ contract RentIssuer is FunctionsClient, FunctionsSource, OwnerIsCreator {
 
         FunctionsRequest.Request memory req;
         req.initializeRequestForInlineJavaScript(this.getRentRWAInfo());
-        if (args.length > 0) req.setArgs(args);
+        if (args.length <= 0) revert("no arguments provided");
+        
+        req.setArgs(args);
         
         requestId = _sendRequest(req.encodeCBOR(), subscriptionId, gasLimit, donID);
 
-        s_issuesInProgress[requestId] = FractionalizedNft(to, rwaKey, 0);
+        s_issuesInProgress[requestId] = FractionalizedNft(to, args[0], 0, 0);
 
         s_lastRequestId = requestId;
     }
@@ -68,9 +71,10 @@ contract RentIssuer is FunctionsClient, FunctionsSource, OwnerIsCreator {
         }
 
         if (s_lastRequestId == requestId) {
-            (uint256 deadlineTime, uint256 price) = abi.decode(response, (uint256, uint256));
+            (uint256 deadlineTime, uint256 price, string memory tokenURI) = abi.decode(response, (uint256, uint256, string));
 
             s_issuesInProgress[requestId].amount = price;
+            s_issuesInProgress[requestId].deadline = deadlineTime;
             uint256 tokenId = s_nextTokenId++;
             FractionalizedNft memory fractionalizedNft = s_issuesInProgress[requestId];
 
