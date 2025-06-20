@@ -193,10 +193,10 @@ function issue(address to, string[] calldata args) external {
 **AI代理处理逻辑:**
 ```typescript
 // getRwa.ts - AI代理调用合约
-const hash = await getRentIssuerContract.write.issue([
+const hash = await getRentIssuerContract.write.issue(
     userAddr,
     args,
-])
+)
 ```
 
 **自然语言模板:**
