@@ -1,2 +1,30 @@
 .deps/
 artifacts/
+
+node_modules/
+.env
+
+dist
+!index.ts
+!character.ts
+.env
+node_modules
+dist/
+data/
+
+db.sqlite
+*sqlite
+.idea
+*.gguf
+llms-full.txt
+
+custom-plugins
+
+# OS specific files
+.DS_Store
+Thumbs.db
+
+
+#generated files
+donSecretsInfo.txt
+encryptedSecretsUrls.txt
