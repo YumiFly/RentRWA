@@ -35,11 +35,11 @@ contract RentIssuer is FunctionsClient, FunctionsSource, OwnerIsCreator {
 
     mapping(bytes32 requestId => FractionalizedNft) internal s_issuesInProgress;
 
-    constructor(address realEstateToken, address functionsRouterAddress, uint64 _subscriptionId, uint32 _gasLimit, bytes32 _donID) FunctionsClient(functionsRouterAddress) {
+    constructor(address realRentToken, address functionsRouterAddress, uint64 _subscriptionId, uint32 _gasLimit, bytes32 _donID) FunctionsClient(functionsRouterAddress) {
         subscriptionId = _subscriptionId;
         gasLimit = _gasLimit;
         donID = _donID;
-        i_realRentToken = RealRentToken(realEstateToken);
+        i_realRentToken = RealRentToken(realRentToken);
     }
 
     function issue(address to, string[] calldata args)
