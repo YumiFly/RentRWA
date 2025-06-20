@@ -1,0 +1,40 @@
+graph LR
+    subgraph "抵押阶段"
+        A1[RWA代币持有者] --> A2[抵押RWA代币]
+        A2 --> A3[Chainlink Price Feeds<br/>获取USDC汇率]
+        A3 --> A4[计算可借贷金额]
+    end
+    
+    subgraph "出借阶段"
+        B1[USDC持有者1] --> B2[提供USDC流动性]
+        B3[USDC持有者2] --> B2
+        B4[USDC持有者N] --> B2
+        B2 --> B5[记录出借详情]
+    end
+    
+    subgraph "借贷执行"
+        C1[借贷合约] --> C2[验证抵押品价值]
+        C2 --> C3[转移USDC给借款人]
+        C3 --> C4[锁定RWA代币]
+    end
+    
+    subgraph "还款阶段"
+        D1[借款人还款] --> D2[归还USDC给出借者]
+        D2 --> D3[释放抵押的RWA代币]
+        D3 --> D4[完成借贷周期]
+    end
+    
+    A4 --> C1
+    B5 --> C1
+    C4 --> D1
+    
+    %% 样式
+    classDef collateral fill:#e3f2fd
+    classDef lending fill:#f1f8e9
+    classDef execution fill:#fff3e0
+    classDef repayment fill:#fce4ec
+    
+    class A1,A2,A3,A4 collateral
+    class B1,B2,B3,B4,B5 lending
+    class C1,C2,C3,C4 execution
+    class D1,D2,D3,D4 repayment

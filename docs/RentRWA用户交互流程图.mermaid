@@ -1,0 +1,30 @@
+sequenceDiagram
+    participant User as 👤 用户
+    participant AI as 🤖 AI代理
+    participant Contract as 📄 智能合约
+    participant Functions as 🔗 Chainlink Functions
+    participant DB as 🗄️ Supabase数据库
+    participant Blockchain as ⛓️ 区块链
+
+    User->>AI: "我的地址是0x123..., RWA密钥是ABC123"
+    
+    Note over AI: 自然语言处理
+    AI->>AI: 提取钱包地址和RWA密钥
+    AI->>AI: 验证参数格式
+    
+    AI->>Contract: 调用issue()函数
+    Contract->>Functions: 发起Functions请求
+    
+    Note over Functions: DON网络执行
+    Functions->>DB: 查询房地产数据
+    DB-->>Functions: 返回价格、截止时间、证明URL
+    
+    Functions-->>Contract: 返回编码数据
+    Contract->>Contract: 解码数据并铸造代币
+    Contract->>Blockchain: 执行交易
+    
+    Blockchain-->>Contract: 交易确认
+    Contract-->>AI: 返回交易哈希
+    AI-->>User: "成功！交易哈希: 0xdef456..."
+    
+    Note over User,Blockchain: 整个流程约30秒完成

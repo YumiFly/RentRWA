@@ -1,0 +1,80 @@
+graph TB
+    subgraph "AI代理层"
+        A1[ElizaOS框架]
+        A2[自然语言处理]
+        A3[Twitter集成]
+        A4[命令行界面]
+    end
+    
+    subgraph "智能合约层"
+        B1[RentIssuer<br/>Chainlink Functions]
+        B2[RentLending<br/>Price Feeds]
+        B3[RealRentToken<br/>ERC1155]
+        B4[ERC1155Core<br/>基础合约]
+    end
+    
+    subgraph "预言机层"
+        C1[Chainlink Functions<br/>数据获取]
+        C2[Chainlink Price Feeds<br/>USDC/USD]
+        C3[Chainlink DON<br/>去中心化网络]
+    end
+    
+    subgraph "数据层"
+        D1[Supabase数据库<br/>房地产信息]
+        D2[房地产API<br/>外部数据源]
+        D3[价格数据源<br/>市场数据]
+    end
+    
+    subgraph "用户交互"
+        E1[用户输入<br/>自然语言]
+        E2[Twitter消息]
+        E3[命令行输入]
+    end
+    
+    subgraph "区块链网络"
+        F1[Avalanche Fuji<br/>测试网]
+        F2[智能合约部署]
+        F3[交易执行]
+    end
+    
+    %% 连接关系
+    E1 --> A2
+    E2 --> A3
+    E3 --> A4
+    
+    A1 --> B1
+    A2 --> B1
+    A3 --> B1
+    A4 --> B1
+    
+    B1 --> C1
+    B2 --> C2
+    B1 --> B3
+    B2 --> B3
+    B3 --> B4
+    
+    C1 --> D1
+    C2 --> D3
+    C3 --> D1
+    C3 --> D2
+    
+    B1 --> F2
+    B2 --> F2
+    B3 --> F2
+    F2 --> F1
+    F2 --> F3
+    
+    %% 样式
+    classDef aiLayer fill:#e1f5fe
+    classDef contractLayer fill:#f3e5f5
+    classDef oracleLayer fill:#e8f5e8
+    classDef dataLayer fill:#fff3e0
+    classDef userLayer fill:#fce4ec
+    classDef blockchainLayer fill:#e0f2f1
+    
+    class A1,A2,A3,A4 aiLayer
+    class B1,B2,B3,B4 contractLayer
+    class C1,C2,C3 oracleLayer
+    class D1,D2,D3 dataLayer
+    class E1,E2,E3 userLayer
+    class F1,F2,F3 blockchainLayer
