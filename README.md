@@ -27,10 +27,10 @@
 - 多方出借者参与
 - Chainlink价格预言机集成
 
-### 4. 跨链支持
-- 基于Chainlink CCIP的跨链功能
+### 4. 网络支持
 - 支持Avalanche Fuji测试网
 - EVM兼容网络扩展
+- 为未来跨链功能预留接口
 
 ## 📁 项目结构
 
@@ -67,8 +67,8 @@ RentRWA/
 #### 2. Chainlink Price Feeds
 - **[RentLending.sol](src/contracts/RentLending.sol)** - 集成USDC/USD价格预言机用于借贷估值
 
-#### 3. Chainlink CCIP (跨链互操作协议)
-- **[RealRentToken.sol](src/contracts/RealRentToken.sol)** - 集成CCIP路由器支持跨链功能
+#### 3. 房地产代币合约
+- **[RealRentToken.sol](src/contracts/RealRentToken.sol)** - 基于ERC1155的房地产租金代币合约
 
 ### 前端中的Chainlink集成
 
@@ -137,8 +137,7 @@ Agent: 成功调用合约！交易哈希: 0xdef456...
 ### Chainlink集成亮点
 1. **Functions**: 去中心化数据获取，从Supabase安全获取房地产信息
 2. **Price Feeds**: 实时USDC/USD汇率用于借贷估值
-3. **CCIP**: 跨链代币转移和数据同步
-4. **DON**: 去中心化预言机网络确保数据可信性
+3. **DON**: 去中心化预言机网络确保数据可信性
 
 ### AI代理特性
 1. **自然语言处理**: 智能提取钱包地址和RWA密钥

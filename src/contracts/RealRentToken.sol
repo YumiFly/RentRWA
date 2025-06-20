@@ -10,11 +10,7 @@ import {ERC1155Core} from "./ERC1155Core.sol";
 contract RealRentToken is ERC1155Core {
     
     constructor(
-        string memory uri_,
-        address ccipRouterAddress,
-        address linkTokenAddress,
-        uint64 currentChainSelector,
-        address functionsRouterAddress
+        string memory uri_
     )
       ERC1155Core(uri_)
     {}
