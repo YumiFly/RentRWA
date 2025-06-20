@@ -46,8 +46,8 @@ RentRWA/
 │   └── frontend/            # AI代理前端
 │       ├── src/
 │       │   ├── rwa-plugins/
+│       │   ├── light_twitter-clients/
 │       │   ├── chat/
-│       │   ├── clients/
 │       │   └── database/
 │       ├── scripts/
 │       └── characters/
