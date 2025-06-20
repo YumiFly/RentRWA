@@ -68,10 +68,7 @@ export class GetRwaAction {
             const args: string[] = [params.rwaKey];
             const userAddr = params.address;
 
-            const hash = await getRentIssuerContract.write.issue([
-                userAddr,
-                args,
-            ])
+            const hash = await getRentIssuerContract.write.issue(userAddr, args);
 
             return {
                 hash,
