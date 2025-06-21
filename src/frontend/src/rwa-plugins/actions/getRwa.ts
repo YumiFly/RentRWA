@@ -38,7 +38,7 @@ export class GetRwaAction {
      */
     async getRwa(params: GetRwaParams): Promise<Transaction> {
         const chainName = "avalancheFuji";
-        const contractAddress: `0x${string}` =  "0x26EB30E5A1E583D778eB543210dE00c3c33AD23F" // dev TODO
+        const contractAddress: `0x${string}` =  "0x00" // dev TODO
         // const donHostedSecretsSlotID:number = 0 // dev TODO
         // const donHostedSecretsVersion:number = 1749628006 // dev TODO
         const clSubId:number = 15576 // dev TODO
