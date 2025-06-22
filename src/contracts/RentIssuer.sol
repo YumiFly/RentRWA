@@ -16,29 +16,36 @@ contract RentIssuer is FunctionsClient, FunctionsSource, OwnerIsCreator {
     using FunctionsRequest for FunctionsRequest.Request;
 
     error LatestIssueInProgress();
+    error UnexpectedRequestID(bytes32);
 
     struct FractionalizedNft {
         address to;
         string rwaKey;
         uint256 amount;
         uint256 deadline;
+        string proof;
     }
 
-    RealRentToken internal immutable i_realRentToken;
+    RealRentToken public immutable i_realRentToken;
 
-    bytes32 internal s_lastRequestId;
-    uint256 private s_nextTokenId;
-    uint64 private subscriptionId;
-    uint32 private gasLimit;
-    bytes32 private donID;
+    bytes public s_lastResponse;
+    bytes public s_lastError;
 
+    bytes32 public s_lastRequestId;
+    uint256 public s_nextTokenId;
+    uint64 public subscriptionId = 15530;
+    uint32 public gasLimit = 300000;
+    bytes32 public donID = 0x66756e2d6176616c616e6368652d66756a692d31000000000000000000000000;
 
-    mapping(bytes32 requestId => FractionalizedNft) internal s_issuesInProgress;
+    address public constant functionsRouterAddress = 0xA9d587a00A31A52Ed70D6026794a8FC5E2F5dCb0;
 
-    constructor(address realRentToken, address functionsRouterAddress, uint64 _subscriptionId, uint32 _gasLimit, bytes32 _donID) FunctionsClient(functionsRouterAddress) {
-        subscriptionId = _subscriptionId;
-        gasLimit = _gasLimit;
-        donID = _donID;
+    mapping(bytes32 requestId => FractionalizedNft) public s_issuesInProgress;
+
+    //constructor(address realRentToken, address functionsRouterAddress, uint64 _subscriptionId, uint32 _gasLimit, bytes32 _donID) FunctionsClient(functionsRouterAddress) {
+    constructor(address realRentToken) FunctionsClient(functionsRouterAddress) {
+        // subscriptionId = _subscriptionId;
+        // gasLimit = _gasLimit;
+        // donID = _donID;
         i_realRentToken = RealRentToken(realRentToken);
     }
 
@@ -46,17 +53,19 @@ contract RentIssuer is FunctionsClient, FunctionsSource, OwnerIsCreator {
         external
         returns (bytes32 requestId)
     {
-        if (s_lastRequestId != bytes32(0)) revert LatestIssueInProgress();
+        if (s_lastRequestId != bytes32(0)) {
+            revert LatestIssueInProgress();
+        }
 
         FunctionsRequest.Request memory req;
         req.initializeRequestForInlineJavaScript(this.getRentRWAInfo());
         if (args.length <= 0) revert("no arguments provided");
-        
+
         req.setArgs(args);
         
         requestId = _sendRequest(req.encodeCBOR(), subscriptionId, gasLimit, donID);
 
-        s_issuesInProgress[requestId] = FractionalizedNft(to, args[0], 0, 0);
+        s_issuesInProgress[requestId] = FractionalizedNft(to, args[0], 0, 0, "");
 
         s_lastRequestId = requestId;
     }
@@ -69,18 +78,25 @@ contract RentIssuer is FunctionsClient, FunctionsSource, OwnerIsCreator {
         if (err.length != 0) {
             revert(string(err));
         }
-
-        if (s_lastRequestId == requestId) {
-            (uint256 deadlineTime, uint256 price, string memory tokenURI) = abi.decode(response, (uint256, uint256, string));
-
-            s_issuesInProgress[requestId].amount = price;
-            s_issuesInProgress[requestId].deadline = deadlineTime;
-            uint256 tokenId = s_nextTokenId++;
-            FractionalizedNft memory fractionalizedNft = s_issuesInProgress[requestId];
-
-            i_realRentToken.mint(fractionalizedNft.to, tokenId, fractionalizedNft.amount, "", tokenURI);
-
-            s_lastRequestId = bytes32(0);
+        if (s_lastRequestId != requestId) {
+            revert UnexpectedRequestID(requestId);
         }
+        s_lastResponse = response;
+        s_lastError = err;
+
+        (uint256 answer, uint256 price, string memory proof) = abi.decode(response, (uint256, uint256, string));
+        
+        s_issuesInProgress[requestId].amount = price;
+        s_issuesInProgress[requestId].proof = proof;
+        //s_issuesInProgress[requestId].deadline = ddline;
+
+        s_lastRequestId = bytes32(0);
+    }
+
+    function RentTokenMint(bytes32 requestId) external returns (uint256) {
+        uint256 tokenId = s_nextTokenId++;
+        FractionalizedNft memory fractionalizedNft = s_issuesInProgress[requestId];
+        i_realRentToken.mint(fractionalizedNft.to, tokenId, fractionalizedNft.amount, "", fractionalizedNft.proof);
+        return tokenId;
     }
 }
