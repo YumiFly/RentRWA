@@ -41,6 +41,8 @@ contract RentIssuer is FunctionsClient, FunctionsSource, OwnerIsCreator {
 
     mapping(bytes32 requestId => FractionalizedNft) public s_issuesInProgress;
 
+    event Issued(address to, bytes32 requestId);
+
     //constructor(address realRentToken, address functionsRouterAddress, uint64 _subscriptionId, uint32 _gasLimit, bytes32 _donID) FunctionsClient(functionsRouterAddress) {
     constructor(address realRentToken) FunctionsClient(functionsRouterAddress) {
         // subscriptionId = _subscriptionId;
@@ -66,7 +68,7 @@ contract RentIssuer is FunctionsClient, FunctionsSource, OwnerIsCreator {
         requestId = _sendRequest(req.encodeCBOR(), subscriptionId, gasLimit, donID);
 
         s_issuesInProgress[requestId] = FractionalizedNft(to, args[0], 0, 0, "");
-
+        
         s_lastRequestId = requestId;
     }
 
@@ -89,7 +91,7 @@ contract RentIssuer is FunctionsClient, FunctionsSource, OwnerIsCreator {
         s_issuesInProgress[requestId].amount = price;
         s_issuesInProgress[requestId].proof = proof;
         //s_issuesInProgress[requestId].deadline = ddline;
-
+        emit Issued(s_issuesInProgress[requestId].to , requestId);
         s_lastRequestId = bytes32(0);
     }
 
