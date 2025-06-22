@@ -1,0 +1,38 @@
+sequenceDiagram
+    participant 房东 as 🏠 房东
+    participant 门店 as 🏢 线下门店
+    participant 数据库 as 🗄️ Supabase数据库
+    participant AI as 🤖 ElizaOS AI代理
+    participant 合约 as 📄 RentIssuer合约
+    participant Functions as 🔗 Chainlink Functions
+    participant 借贷 as 🏦 RentLending合约
+    participant 出借者 as 💰 USDC出借者
+
+    Note over 房东,数据库: 线下合规阶段
+    房东->>门店: 1. 提供租赁合同和证明
+    门店->>门店: 2. 审核评估
+    门店->>数据库: 3. 录入房产信息
+    门店->>房东: 4. 提供RWAKey
+
+    Note over 房东,Functions: 线上AI代币化阶段
+    房东->>AI: 5. "地址0x123, RWAKey ABC123"
+    AI->>AI: 6. 智能提取参数
+    AI->>合约: 7. 调用issue()函数
+    合约->>Functions: 8. 发起Functions请求
+    Functions->>数据库: 9. 查询房产数据
+    数据库-->>Functions: 10. 返回价格、截止时间
+    Functions-->>合约: 11. 返回编码数据
+    合约->>合约: 12. 铸造RWA代币
+    合约-->>AI: 13. 返回交易哈希
+    AI-->>房东: 14. "成功！交易哈希: 0xdef456"
+
+    Note over 房东,出借者: DeFi借贷阶段
+    房东->>借贷: 15. 质押RWA代币
+    借贷->>借贷: 16. Price Feeds估值
+    出借者->>借贷: 17. 提供USDC流动性
+    借贷->>房东: 18. 转移USDC给房东
+    
+    Note over 房东,出借者: 还款赎回阶段
+    房东->>借贷: 19. 还款USDC
+    借贷->>出借者: 20. 分配USDC给出借者
+    借贷->>房东: 21. 返还RWA代币
