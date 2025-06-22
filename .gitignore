@@ -1,6 +1,7 @@
 .deps/
 artifacts/
 .states/
+.deploys/
 
 node_modules/
 .env
