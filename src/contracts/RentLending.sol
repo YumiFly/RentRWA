@@ -32,7 +32,7 @@ contract RentLending is IERC1155Receiver, OwnerIsCreator, ReentrancyGuard {
     AggregatorV3Interface internal s_usdcUsdAggregator;
     uint32 internal s_usdcUsdFeedHeartbeat;
 
-    mapping(uint256 tokenId => LoanDetails) internal s_activeLoans;
+    mapping(uint256 tokenId => LoanDetails) public s_activeLoans;
 
 
     event LendRWA(uint256 indexed tokenId, uint256 amountRwa, uint256 amountUsdc);
@@ -61,10 +61,11 @@ contract RentLending is IERC1155Receiver, OwnerIsCreator, ReentrancyGuard {
 
     function lendRWA(
         uint256 tokenId,
-        uint256 amountRwa,
-        bytes memory data
+        uint256 amountRwa
     ) external nonReentrant {
-        if (s_activeLoans[tokenId].usdcAmountLoaned != 0) revert AlreadyBorrowed(msg.sender, tokenId);
+        if (s_activeLoans[tokenId].usdcAmountLoaned != 0) {
+            revert AlreadyBorrowed(msg.sender, tokenId);
+        }
 
         // 判断输入的 amountUsd 是否合理
         if (amountRwa > i_realRentToken.totalSupply(tokenId) || amountRwa == 0) {
@@ -72,11 +73,11 @@ contract RentLending is IERC1155Receiver, OwnerIsCreator, ReentrancyGuard {
         }
 
         uint256 amountUsdc = getValuationInUsdc(amountRwa);
-
-        if (amountUsdc == 0) revert InvalidValue();
-
+        if (amountUsdc == 0) {
+            revert InvalidValue();
+        }
         // rwa owner 出借 rwa token
-        i_realRentToken.safeTransferFrom(msg.sender, address(this), tokenId, amountRwa, data);
+        i_realRentToken.safeTransferFrom(msg.sender, address(this), tokenId, amountRwa, "0x0");
 
         // 记录 rwa token 出借信息
         s_activeLoans[tokenId].erc1155AmountSupplied = amountRwa;
@@ -109,7 +110,9 @@ contract RentLending is IERC1155Receiver, OwnerIsCreator, ReentrancyGuard {
 
     function repay(uint256 tokenId) external nonReentrant {
         
-        if( s_activeLoans[tokenId].owner != msg.sender) revert InvalidValue();
+        if( s_activeLoans[tokenId].owner != msg.sender) {
+            revert InvalidValue();
+        }
         
         for (uint256 i = 0; i < s_activeLoans[tokenId].usdcLenders.length; i++) {
             address usdcLender = s_activeLoans[tokenId].usdcLenders[i];
@@ -117,11 +120,11 @@ contract RentLending is IERC1155Receiver, OwnerIsCreator, ReentrancyGuard {
 
             if (usdcAmount > 0) {
                 // 退还 ERC20 给 usdc lender
-                IERC20(i_usdc).safeTransfer(usdcLender, usdcAmount);
+                IERC20(i_usdc).safeTransferFrom(msg.sender, usdcLender, usdcAmount);
             }
         }
         // 取走 ERC1155
-        i_realRentToken.safeTransferFrom(address(this), msg.sender, tokenId, s_activeLoans[tokenId].erc1155AmountSupplied, "");
+        i_realRentToken.safeTransferFrom(address(this), msg.sender, tokenId, s_activeLoans[tokenId].erc1155AmountSupplied, "0x0");
 
         // 触发事件
         emit Repayed(tokenId, s_activeLoans[tokenId].erc1155AmountSupplied);
@@ -149,9 +152,9 @@ contract RentLending is IERC1155Receiver, OwnerIsCreator, ReentrancyGuard {
 
         if (_roundId == 0) revert InvalidRoundId();
 
-        if (_updatedAt < block.timestamp - s_usdcUsdFeedHeartbeat) {
-            revert StalePriceFeed();
-        }
+        // if (_updatedAt < block.timestamp - s_usdcUsdFeedHeartbeat) {
+        //     revert StalePriceFeed();
+        // }
 
         return uint256(_price);
     }
