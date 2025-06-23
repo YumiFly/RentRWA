@@ -24,6 +24,7 @@ contract RentIssuer is FunctionsClient, FunctionsSource, OwnerIsCreator {
         uint256 amount;
         uint256 deadline;
         string proof;
+        uint256 tokenId;
     }
 
     RealRentToken public immutable i_realRentToken;
@@ -67,7 +68,7 @@ contract RentIssuer is FunctionsClient, FunctionsSource, OwnerIsCreator {
         
         requestId = _sendRequest(req.encodeCBOR(), subscriptionId, gasLimit, donID);
 
-        s_issuesInProgress[requestId] = FractionalizedNft(to, args[0], 0, 0, "");
+        s_issuesInProgress[requestId] = FractionalizedNft(to, args[0], 0, 0, "", 0);
         
         s_lastRequestId = requestId;
     }
@@ -99,6 +100,7 @@ contract RentIssuer is FunctionsClient, FunctionsSource, OwnerIsCreator {
         uint256 tokenId = s_nextTokenId++;
         FractionalizedNft memory fractionalizedNft = s_issuesInProgress[requestId];
         i_realRentToken.mint(fractionalizedNft.to, tokenId, fractionalizedNft.amount, "", fractionalizedNft.proof);
+        s_issuesInProgress[requestId].tokenId = tokenId;
         return tokenId;
     }
 }
