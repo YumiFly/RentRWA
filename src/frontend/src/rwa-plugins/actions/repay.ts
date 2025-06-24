@@ -181,7 +181,21 @@ export const repayAction: Action = {
                     action: "PUT_UP_USDC",
                 },
             },
+            {
+                user: "user",
+                content: {
+                    text: "I’m here to repay. tokenId: 1234, USDC: XXX. Time to bring the RWA back home. 🔁.",
+                    action: "REPAY_USDC",
+                },
+            },
+            {
+                user:"user",
+                content:{
+                    text:"It’s payback time! Repaying XXX USDC for RWA token 1234. No drama, just smart contracts and good vibes. 💸🕊️",
+                    action:"PAYBACK"
+                }
+            }
         ],
     ],
-    similes: ["REPAY"],
+    similes: ["REPAY","USDC_REPAY","PUT_UP_USDC","REPAY_USDC","PAYBACK"],
 };

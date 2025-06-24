@@ -5,7 +5,7 @@ export const character: Character = {
   ...defaultCharacter,
   // name: "Eliza",
   plugins: [getRwaPlugin],
-  clients: [], // [Clients.TWITTER]
+  clients: [Clients.TWITTER], // [Clients.TWITTER]
   modelProvider: ModelProviderName.GOOGLE,
   settings: {
     secrets: {},

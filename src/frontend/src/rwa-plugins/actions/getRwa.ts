@@ -350,7 +350,21 @@ export const getRwaAction: Action = {
                     action: "SEND_RWA",
                 },
             },
+            {
+                user: "user",
+                content: {
+                    text: "I have a real-world asset ready for tokenization. My wallet: 0x…abcd. RWA Key: XXXX. Can you help me make it blockchain-worthy? ",
+                    action: "TOKEN_RWA",
+                },
+            },
+            {
+                user: "user",
+                content: {
+                    text: "I’d like to mint an RWA token. Wallet: 0x…de3. RWA Key: Nbbu…1Z4Z4. Let’s digitize reality.",
+                    action: "RWA_TOKEN",
+                },
+            },
         ],
     ],
-    similes: ["GET_RWA", "RWA_GIVE", "SEND_RWA"],
+    similes: ["GET_RWA", "RWA_GIVE", "SEND_RWA","TOKEN_RWA","RWA_TOKEN"],
 };

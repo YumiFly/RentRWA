@@ -218,7 +218,7 @@ export const lendRwaAction: Action = {
             {
                 user: "user",
                 content: {
-                    text: "“I hereby agree to pledge 5 RWA tokens as collateral to support a USDC loan for the lending contract . The tokenId I own is 1.”",
+                    text: "lend time! I’ll commit XXX RWA tokens (ID: 1234). This might just be the moment I become a DeFi legend.",
                     action: "RWA_LEND",
                 },
             },
@@ -229,7 +229,21 @@ export const lendRwaAction: Action = {
                     action: "PUT_UP_RWA",
                 },
             },
+            {
+                user: "user",
+                content: {
+                    text: " I want to stake my RWA to support someone in need. tokenId: 1234, amount: XXX. Let’s save the DeFi world together. 🔥🛟.",
+                    action: "STAKE_RWA",
+                },
+            },
+            {
+                user: "user",
+                content: {
+                    text: " Time to put my RWA tokens to work. Stake tokenId 1234 with XXX amount. For Bob. For the culture. 💼❤️",
+                    action: "RWA_STAKE",
+                },
+            }
         ],
     ],
-    similes: ["LEND_RWA","RWA_LEND","PUT_UP_RWA"],
+    similes: ["LEND_RWA","RWA_LEND","PUT_UP_RWA","STAKE_RWA","RWA_STAKE"],
 };

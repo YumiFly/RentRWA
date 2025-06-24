@@ -228,7 +228,21 @@ export const lendUsdcAction: Action = {
                     action: "PUT_UP_USDC",
                 },
             },
+            {
+                user: "user",
+                content: {
+                    text: "Go ahead ! Token #1234 is good to go — lend out XXX USDC. Let’s support. That’s what RWA is for. 💖",
+                    action: "APPROVE_USDC",
+                },
+            },
+            {
+                user: "user",
+                content: {
+                    text: " here — I’m greenlighting the USDC loan. Token ID: 1234, amount: XXX. send it over to trust . 🤝",
+                    action: "USDC_APPROVE",
+                },
+            }
         ],
     ],
-    similes: ["LEND_USDC","USDC_LEND","PUT_UP_USDC"],
+    similes: ["LEND_USDC","USDC_LEND","PUT_UP_USDC","APPROVE_USDC","USDC_APPROVE"],
 };
