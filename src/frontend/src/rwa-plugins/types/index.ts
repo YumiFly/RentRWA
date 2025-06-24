@@ -11,6 +11,21 @@ export interface GetRwaParams {
     rwaKey: string;
 }
 
+export interface LendRwaParams {
+    tokenId: number;
+    amountRwa: number;
+}
+
+export interface LendUsdcParams {
+    tokenId: number;
+    amountUsdc: number; // in USDC
+}
+
+export interface RepayParams {
+    tokenId: number; // in USDC
+    amountUsdc: number; 
+}
+
 export interface Transaction {
     hash: Hash;
     from: Address;

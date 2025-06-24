@@ -14,7 +14,7 @@ export const getRwaPlugin: Plugin = {
     providers: [evmWalletProvider],
     evaluators: [],
     services: [],
-    actions: [getRwaAction,lendRwaAction,lendUsdcAction, repayAction],
+    actions: [getRwaAction,lendRwaAction,lendUsdcAction, repayAction], //,lendRwaAction,lendUsdcAction, repayAction
 };
 
 export default getRwaPlugin;

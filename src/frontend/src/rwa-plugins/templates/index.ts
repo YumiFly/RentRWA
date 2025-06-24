@@ -57,25 +57,28 @@ First, review the recent messages from the conversation:
 </recent_messages>
 
 Your goal is to extract the following information required to lend a Real World Asset:
-1. rwa key: This is a string (usually a tokenId or code), composed of letters and numbers.
-2. Wallet address: A valid Ethereum address starting with '0x' and 42 characters long.
+1. tokenId: This is a number (usually a tokenId or code), composed of letters and numbers.
+2. amountRwa: This is a number representing the amount of RWA to be lent.
 
 Example input:
-"I want to lend my RWA with key RWA123ABC to the pool. My wallet is 0x742d35Cc6634C0532925a3b844Bc454e4438f44e."
+"I would like to exchange 2 RWA tokens for some USDC. My tokenId is 2 ."
+"I intend to lend 10 RWA tokens under token ID 1 in exchange for USDC."
+"Lending 10 RWA tokens (tokenId: 1) for USDC."
+"Request to swap 10 RWA tokens (ID 1) for USDC"
 
 From this, you should extract:
-- rwaKey: RWA123ABC
-- address: 0x742d35Cc6634C0532925a3b844Bc454e4438f44e
+- tokenId: 1
+- amountRwa: 10
 
 Before providing the final JSON output, show your reasoning process inside <analysis> tags. Follow these steps:
 
 1. Identify and quote the relevant parts of the user's message:
-   - The part mentioning the rwa key (sometimes called tokenId, key, or RWA code).
-   - The part mentioning the wallet address (usually starts with '0x').
+   - The part mentioning the tokenId (sometimes called tokenId, key, or token ID).
+   - The part mentioning the rwa token or rwa tokens (usually a number).
 
 2. Validate each item:
-   - rwaKey: must be alphanumeric, at least 6 characters.
-   - address: must start with '0x' and be exactly 42 characters.
+   - tokenId: must be a number
+   - amountRwa: must be a number
 
 3. If either value is invalid or missing, return an appropriate error message.
 
@@ -85,8 +88,8 @@ Before providing the final JSON output, show your reasoning process inside <anal
 
 \`\`\`json
 {
-  "rwaKey": string,
-  "address": string
+  "tokenId": number,
+  "amountRwa": number
 }
 \`\`\`
 
@@ -100,17 +103,23 @@ export const lendUsdcTemplate = `You are an assistant helping users lend USDC to
 </recent_messages>
 
 Your job is to extract the following values:
-1. rwaKey: a string representing the token ID or RWA key.
-2. address: the user's wallet address (should start with '0x' and be 42 characters).
+1. tokenId: This is a number (usually a tokenId or code), composed of letters and numbers.
+2. amountUsdc:  This is a number representing the amount of USDC to be lent.
+
+Example input:
+"I intend to purchase the RWA token identified by token ID 1 by paying 5 USDC"
+"I want to purchase the RWA token with token ID 1 using 5 USDC."
+"I’d like to use 1 USDC to buy the RWA token with ID 3."
 
 If both values are valid, return a JSON object:
 \`\`\`json
 {
-  "rwaKey": "...",
-  "address": "..."
+  "tokenId": 1,
+  "amountUsdc": 5
 }
 \`\`\`
 If either is missing, return an explanation.`;
+
 
 export const repayTemplate = `You are an assistant helping users repay their RWA loans.
 
@@ -119,14 +128,21 @@ export const repayTemplate = `You are an assistant helping users repay their RWA
 </recent_messages>
 
 Your job is to extract:
-1. rwaKey: a string representing the token ID for the RWA asset.
-2. address: the wallet address of the borrower.
+1. tokenId: This is a number (usually a tokenId or code), composed of letters and numbers.
+2. amountUsdc:  This is a number representing the amount of USDC to be repaid.
+
+Example input:
+"I would like to repay my RWA loan with token ID 1 , total 5 USDC."
+"I want to pay off my RWA loan with token ID 1, total 5 USDC."
+"Repaying my RWA loan with token ID 1, total 5 USDC."
+
+If the tokenId is valid, return a JSON object:
 
 Return a JSON object like this:
 \`\`\`json
 {
-  "rwaKey": "...",
-  "address": "..."
+  "tokenId": 1,
+  "amountUsdc": 5
 }
 \`\`\`
 
