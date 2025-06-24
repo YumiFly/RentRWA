@@ -1,136 +1,138 @@
-# RentRWA - 线下合规+AI驱动的房租抵押借贷平台
+# RentRWA - Offline Compliance + AI-Driven Rental Collateral Lending Platform
 
-一个创新的房地产租金收益代币化（Real World Asset Tokenization）平台，结合线下合规流程、ElizaOS AI代理和Chainlink预言机技术，让房东通过自然语言对话即可完成房租收益的代币化和抵押借贷。
+**English | [中文版本](README_CN.md)**
 
-## 🏗️ 项目架构
+An innovative Real World Asset Tokenization platform for rental income, combining offline compliance processes, ElizaOS AI agents, and Chainlink oracle technology, enabling landlords to complete rental income tokenization and collateral lending through natural language conversations.
 
-### 核心组件
-- **线下合规层**: 门店审核、合同签订、数据录入
-- **AI代理层**: 基于ElizaOS框架的智能助手，支持多平台交互
-- **智能合约层**: 基于ERC1155的房租代币化和DeFi借贷协议
-- **预言机层**: Chainlink Functions和Price Feeds集成
-- **数据层**: Supabase数据库存储审核后的房地产信息
+## 🏗️ Project Architecture
 
-## 🤖 主要功能
+### Core Components
+- **Offline Compliance Layer**: Store auditing, contract signing, data entry
+- **AI Agent Layer**: ElizaOS framework-based intelligent assistant with multi-platform support
+- **Smart Contract Layer**: ERC1155-based rental tokenization and DeFi lending protocol
+- **Oracle Layer**: Chainlink Functions and Price Feeds integration
+- **Data Layer**: Supabase database storing audited real estate information
 
-### 1. 线下合规流程
-- 房东到线下门店提供租赁合同和证明
-- 工作人员审核评估，签订真实租金抵押合同
-- 将房产信息录入Supabase数据库，生成唯一RWAKey
+## 🤖 Main Features
 
-### 2. AI驱动的用户交互
-- 基于ElizaOS框架的智能代理，支持自然语言处理
-- 多平台支持：命令行聊天、Twitter社交媒体交互、HTTP API
-- 智能参数提取和验证，一句话完成复杂DeFi操作
+### 1. Offline Compliance Process
+- Landlords visit offline stores to provide lease contracts and proof of ownership
+- Staff audit and evaluate, sign real rental collateral contracts
+- Input property information into Supabase database, generate unique RWAKey
 
-### 3. 房租收益代币化
-- ERC1155标准的多代币合约，支持批量操作
-- 通过Chainlink Functions自动获取审核后的房产数据
-- 自动铸造基于真实房租收益的RWA代币
+### 2. AI-Driven User Interaction
+- ElizaOS framework-based intelligent agent with natural language processing
+- Multi-platform support: command line chat, Twitter social media interaction, HTTP API
+- Intelligent parameter extraction and validation, complete complex DeFi operations with one sentence
 
-### 4. 完整的DeFi借贷生态
-- **getRwa**: 房租代币化，AI调用智能合约铸造代币
-- **lendRWA**: 质押借贷，房东质押RWA代币获得USDC
-- **lendUSDC**: 流动性提供，USDC持有者提供流动性赚取利息
-- **repay**: 还款赎回，完成借贷周期
+### 3. Rental Income Tokenization
+- ERC1155 standard multi-token contract with batch operation support
+- Automatically obtain audited property data through Chainlink Functions
+- Automatically mint RWA tokens based on real rental income
 
-### 5. 网络支持
-- 部署在Avalanche Fuji测试网
-- EVM兼容智能合约
-- 支持跨链扩展
+### 4. Complete DeFi Lending Ecosystem
+- **getRwa**: Rental tokenization, AI calls smart contracts to mint tokens
+- **lendRWA**: Collateral lending, landlords stake RWA tokens to get USDC
+- **lendUSDC**: Liquidity provision, USDC holders provide liquidity to earn interest
+- **repay**: Repayment and redemption, complete lending cycle
 
-## 📁 项目结构
+### 5. Network Support
+- Deployed on Avalanche Fuji testnet
+- EVM-compatible smart contracts
+- Support for cross-chain expansion
+
+## 📁 Project Structure
 
 ```
 RentRWA/
 ├── src/
-│   ├── contracts/                    # 智能合约层
-│   │   ├── ERC1155Core.sol          # ERC1155基础合约
-│   │   ├── RealRentToken.sol        # 房租收益代币合约
-│   │   ├── RentIssuer.sol           # 代币发行合约(Chainlink Functions)
-│   │   ├── RentLending.sol          # DeFi借贷合约(Price Feeds)
-│   │   └── FunctionsSource.sol      # Chainlink Functions JavaScript代码
-│   └── frontend/                    # AI代理层
+│   ├── contracts/                    # Smart Contract Layer
+│   │   ├── ERC1155Core.sol          # ERC1155 base contract
+│   │   ├── RealRentToken.sol        # Rental income token contract
+│   │   ├── RentIssuer.sol           # Token issuance contract (Chainlink Functions)
+│   │   ├── RentLending.sol          # DeFi lending contract (Price Feeds)
+│   │   └── FunctionsSource.sol      # Chainlink Functions JavaScript code
+│   └── frontend/                    # AI Agent Layer
 │       ├── src/
-│       │   ├── rwa-plugins/         # RWA专用插件
-│       │   │   ├── actions/         # 四个核心action
-│       │   │   │   ├── getRwa.ts    # 代币化action
-│       │   │   │   ├── lendRwa.ts   # 质押借贷action
-│       │   │   │   ├── lendUsdc.ts  # 流动性提供action
-│       │   │   │   └── repay.ts     # 还款赎回action
-│       │   │   ├── templates/       # AI模板
-│       │   │   └── types/           # 类型定义
-│       │   ├── light_twitter-clients/ # Twitter客户端
-│       │   ├── chat/                # 命令行聊天
-│       │   ├── clients/             # 多平台客户端
-│       │   ├── database/            # 数据库适配器
-│       │   └── config/              # 配置管理
-│       ├── scripts/                 # 部署脚本
-│       │   ├── uploadToDON.js       # Chainlink Functions密钥上传
-│       │   └── testDBApi.js         # Supabase API测试
-│       ├── characters/              # AI角色配置
-│       └── package.json             # 依赖管理
-├── docs/                            # 文档和演示材料
+│       │   ├── rwa-plugins/         # RWA-specific plugins
+│       │   │   ├── actions/         # Four core actions
+│       │   │   │   ├── getRwa.ts    # Tokenization action
+│       │   │   │   ├── lendRwa.ts   # Collateral lending action
+│       │   │   │   ├── lendUsdc.ts  # Liquidity provision action
+│       │   │   │   └── repay.ts     # Repayment redemption action
+│       │   │   ├── templates/       # AI templates
+│       │   │   └── types/           # Type definitions
+│       │   ├── light_twitter-clients/ # Twitter client
+│       │   ├── chat/                # Command line chat
+│       │   ├── clients/             # Multi-platform clients
+│       │   ├── database/            # Database adapters
+│       │   └── config/              # Configuration management
+│       ├── scripts/                 # Deployment scripts
+│       │   ├── uploadToDON.js       # Chainlink Functions key upload
+│       │   └── testDBApi.js         # Supabase API testing
+│       ├── characters/              # AI character configuration
+│       └── package.json             # Dependency management
+├── docs/                            # Documentation and presentation materials
 └── README.md
 ```
 
-## 🔗 Chainlink集成文件
+## 🔗 Chainlink Integration Files
 
-本项目深度集成了Chainlink的多项服务，以下是所有相关文件的链接：
+This project deeply integrates multiple Chainlink services. Here are links to all related files:
 
-### 智能合约中的Chainlink集成
+### Chainlink Integration in Smart Contracts
 
 #### 1. Chainlink Functions
-- **[FunctionsSource.sol](src/contracts/FunctionsSource.sol)** - 定义JavaScript代码用于从Supabase获取房地产数据
-- **[RentIssuer.sol](src/contracts/RentIssuer.sol)** - 使用Chainlink Functions自动铸造RWA代币 (部署在[Avalanche Fuji测试网](https://testnet.snowtrace.io/address/0x0382E466541f86a4Dcf73F2709aE8aF24B22dF4B#loaded))
+- **[FunctionsSource.sol](src/contracts/FunctionsSource.sol)** - Defines JavaScript code for fetching real estate data from Supabase
+- **[RentIssuer.sol](src/contracts/RentIssuer.sol)** - Uses Chainlink Functions to automatically mint RWA tokens (Deployed on [Avalanche Fuji Testnet](https://testnet.snowtrace.io/address/0x0382E466541f86a4Dcf73F2709aE8aF24B22dF4B#loaded))
 
 #### 2. Chainlink Price Feeds
-- **[RentLending.sol](src/contracts/RentLending.sol)** - 集成USDC/USD价格预言机用于借贷估值 (部署在[Avalanche Fuji测试网](https://testnet.snowtrace.io/address/0x0b5E917f561a23c57587243e21304D0263685Ed3#loaded))
+- **[RentLending.sol](src/contracts/RentLending.sol)** - Integrates USDC/USD price oracle for lending valuation (Deployed on [Avalanche Fuji Testnet](https://testnet.snowtrace.io/address/0x0b5E917f561a23c57587243e21304D0263685Ed3#loaded))
 
-#### 3. 房地产代币合约
-- **[RealRentToken.sol](src/contracts/RealRentToken.sol)** - 基于ERC1155的房地产租金代币合约 (部署在[Avalanche Fuji测试网](https://testnet.snowtrace.io/address/0x2F4C90cab3fF7D6187F81447669E1eD9C6947BD8#loaded))
+#### 3. Real Estate Token Contract
+- **[RealRentToken.sol](src/contracts/RealRentToken.sol)** - ERC1155-based real estate rental token contract (Deployed on [Avalanche Fuji Testnet](https://testnet.snowtrace.io/address/0x2F4C90cab3fF7D6187F81447669E1eD9C6947BD8#loaded))
 
-### 前端中的Chainlink集成
+### Chainlink Integration in Frontend
 
-#### 1. ElizaOS AI代理插件
-- **[getRwaPlugin](src/frontend/src/rwa-plugins/index.ts)** - 完整的RWA插件，包含四个核心action
-- **[getRwa.ts](src/frontend/src/rwa-plugins/actions/getRwa.ts)** - AI代理调用Chainlink Functions合约
-- **[lendRwa.ts](src/frontend/src/rwa-plugins/actions/lendRwa.ts)** - 质押借贷action
-- **[lendUsdc.ts](src/frontend/src/rwa-plugins/actions/lendUsdc.ts)** - 流动性提供action
-- **[repay.ts](src/frontend/src/rwa-plugins/actions/repay.ts)** - 还款赎回action
+#### 1. ElizaOS AI Agent Plugins
+- **[getRwaPlugin](src/frontend/src/rwa-plugins/index.ts)** - Complete RWA plugin containing four core actions
+- **[getRwa.ts](src/frontend/src/rwa-plugins/actions/getRwa.ts)** - AI agent calls Chainlink Functions contract
+- **[lendRwa.ts](src/frontend/src/rwa-plugins/actions/lendRwa.ts)** - Collateral lending action
+- **[lendUsdc.ts](src/frontend/src/rwa-plugins/actions/lendUsdc.ts)** - Liquidity provision action
+- **[repay.ts](src/frontend/src/rwa-plugins/actions/repay.ts)** - Repayment redemption action
 
-#### 2. Chainlink Functions工具包
-- **[package.json](src/frontend/package.json)** - 依赖`@chainlink/functions-toolkit`
-- **[uploadToDON.js](src/frontend/scripts/uploadToDON.js)** - 上传加密密钥到Chainlink DON网络
-- **[testDBApi.js](src/frontend/scripts/testDBApi.js)** - 测试Supabase API连接（Chainlink Functions的数据源）
+#### 2. Chainlink Functions Toolkit
+- **[package.json](src/frontend/package.json)** - Depends on `@chainlink/functions-toolkit`
+- **[uploadToDON.js](src/frontend/scripts/uploadToDON.js)** - Upload encrypted keys to Chainlink DON network
+- **[testDBApi.js](src/frontend/scripts/testDBApi.js)** - Test Supabase API connection (Chainlink Functions data source)
 
-#### 3. AI模板和类型定义
-- **[getRwaTemplate](src/frontend/src/rwa-plugins/templates/index.ts)** - AI自然语言处理模板
-- **[types](src/frontend/src/rwa-plugins/types/index.ts)** - TypeScript类型定义
+#### 3. AI Templates and Type Definitions
+- **[getRwaTemplate](src/frontend/src/rwa-plugins/templates/index.ts)** - AI natural language processing templates
+- **[types](src/frontend/src/rwa-plugins/types/index.ts)** - TypeScript type definitions
 
-## 🚀 快速开始
+## 🚀 Quick Start
 
-### 环境要求
+### Requirements
 - Node.js >= 22
 - pnpm
 - Solidity 0.8.24
 
-### 安装依赖
+### Install Dependencies
 ```bash
 cd src/frontend
 pnpm install
 ```
 
-### 环境变量配置
-创建 `.env` 文件（参考 `.env.example`）：
+### Environment Configuration
+Create `.env` file (refer to `.env.example`):
 ```env
-# 必需的环境变量
+# Required environment variables
 GEMINI_API_KEY=your_google_gemini_api_key
 EVM_PRIVATE_KEY=0x...
 ETHEREUM_PROVIDER_AVALANCHEFUJI=your_avalanche_fuji_rpc_url
 SUPABASE_API_KEY=your_supabase_public_anon_key
 
-# Twitter集成 (可选)
+# Twitter integration (optional)
 TWITTER_USERNAME=your_bot_username
 TWITTER_PASSWORD=your_bot_password
 TWITTER_EMAIL=your@email.com
@@ -139,152 +141,180 @@ TWITTER_DRY_RUN=false
 TWITTER_RETRY_LIMIT=5
 ```
 
-### 部署Chainlink Functions密钥
+### Deploy Chainlink Functions Keys
 ```bash
 cd src/frontend
 node scripts/uploadToDON.js
 ```
 
-### 启动AI代理
+### Start AI Agent
 ```bash
 pnpm start
 ```
 
-## 💡 使用示例
+## 💡 Usage Examples
 
-### 完整业务流程
+### Complete Business Process
 
-#### 第一步：线下合规（一次性）
-1. 房东到线下门店，提供租赁合同和合法持有证明
-2. 工作人员审核评估，签订租金抵押合同
-3. 将房产信息录入Supabase数据库，生成唯一RWAKey
+#### Step 1: Offline Compliance (One-time)
+1. Landlord visits offline store, provides lease contract and legal proof of ownership
+2. Staff audit and evaluate, sign rental collateral contract
+3. Input property information into Supabase database, generate unique RWAKey
 
-#### 第二步：AI代币化（30秒完成）
+#### Step 2: AI Tokenization (30 seconds)
 ```
-You: 我的钱包地址是0x208aa722aca42399eac5192ee778e4d42f4e5de3，
-     RWA密钥是Nbbut8vlkKe9991Z4Z4，请帮我通证化租金收益
+You: My wallet address is 0x208aa722aca42399eac5192ee778e4d42f4e5de3,
+     RWA key is Nbbut8vlkKe9991Z4Z4, please help me tokenize rental income
 
-Agent: 正在为您处理房租代币化请求...
+Agent: Processing your rental tokenization request...
        📥 Transaction Hash: 0xdef456...
        🆔 RWA TokenId: 1
        📦 RWA Token amount: 1000
-       成功！您的房租收益已代币化，现在可以用于抵押借贷获得USDC流动资金！
+       Success! Your rental income has been tokenized and can now be used for collateral lending to get USDC liquidity!
 ```
 
-#### 第三步：DeFi借贷（可选）
+#### Step 3: DeFi Lending (Optional)
 ```
-You: 我想用RWA代币质押借贷USDC
-Agent: 正在处理质押借贷请求...
-Agent: 成功质押！您已获得USDC流动资金，交易哈希: 0xabc123...
+You: I want to use RWA tokens for collateral lending USDC
+Agent: Processing collateral lending request...
+Agent: Successfully staked! You have received USDC liquidity, transaction hash: 0xabc123...
 ```
 
-### 多平台支持
-- **命令行交互**：本地聊天界面，适合开发和测试
-- **Twitter交互**：用户可以在Twitter上@机器人发送请求
-- **HTTP API**：支持第三方应用集成
+### Multi-Platform Support
+- **Command Line Interaction**: Local chat interface, suitable for development and testing
+- **Twitter Interaction**: Users can send requests by @mentioning the bot on Twitter
+- **HTTP API**: Support for third-party application integration
 
-## 🔧 技术特性
+## 🔧 Technical Features
 
-### Chainlink集成亮点
-1. **Functions**: 去中心化数据获取，从Supabase安全获取线下审核的房产信息
-2. **Price Feeds**: 实时USDC/USD汇率用于DeFi借贷估值
-3. **DON**: 去中心化预言机网络确保数据可信性和抗审查
+### Chainlink Integration Highlights
+1. **Functions**: Decentralized data acquisition, securely obtaining offline-audited property information from Supabase
+2. **Price Feeds**: Real-time USDC/USD exchange rates for DeFi lending valuation
+3. **DON**: Decentralized oracle network ensuring data trustworthiness and censorship resistance
 
-### ElizaOS AI代理特性
-1. **自然语言处理**: 智能提取钱包地址和RWA密钥，支持中英文
-2. **多平台支持**: 命令行聊天、Twitter社交媒体、HTTP API
-3. **完整插件系统**: 四个核心action（getRwa、lendRwa、lendUsdc、repay）
-4. **角色系统**: 可配置的AI角色（Eliza、Trump、Tate等）
-5. **错误处理**: 智能错误检测、参数验证和用户引导
-6. **实时交互**: 支持多轮对话和上下文理解
+### ElizaOS AI Agent Features
+1. **Natural Language Processing**: Intelligently extract wallet addresses and RWA keys, support Chinese and English
+2. **Multi-Platform Support**: Command line chat, Twitter social media, HTTP API
+3. **Complete Plugin System**: Four core actions (getRwa, lendRwa, lendUsdc, repay)
+4. **Character System**: Configurable AI characters (Eliza, Trump, Tate, etc.)
+5. **Error Handling**: Intelligent error detection, parameter validation, and user guidance
+6. **Real-time Interaction**: Support for multi-turn conversations and context understanding
 
-## 🏦 完整的DeFi生态
+## 🏦 Complete DeFi Ecosystem
 
-### 四个核心功能模块
+### Four Core Functional Modules
 
-#### 1. 租金代币化 (getRwa)
-- 房东提供RWAKey，AI代理调用RentIssuer合约
-- Chainlink Functions查询Supabase获取审核后的房产数据
-- 自动铸造ERC1155格式的房租收益代币
+#### 1. Rental Tokenization (getRwa)
+- Landlord provides RWAKey, AI agent calls RentIssuer contract
+- Chainlink Functions queries Supabase to get audited property data
+- Automatically mint ERC1155 format rental income tokens
 
-#### 2. 质押借贷 (lendRWA)
-- 房东质押RWA代币到RentLending合约
-- Chainlink Price Feeds获取USDC汇率进行估值
-- 获得对应价值的USDC流动资金
+#### 2. Collateral Lending (lendRWA)
+- Landlord stakes RWA tokens to RentLending contract
+- Chainlink Price Feeds get USDC exchange rate for valuation
+- Obtain corresponding value of USDC liquidity
 
-#### 3. 流动性提供 (lendUSDC)
-- USDC持有者向协议提供流动性
-- 支持多个出借者参与同一笔贷款
-- 获得借贷利息收入
+#### 3. Liquidity Provision (lendUSDC)
+- USDC holders provide liquidity to the protocol
+- Support multiple lenders participating in the same loan
+- Earn lending interest income
 
-#### 4. 还款赎回 (repay)
-- 房东还款USDC给所有出借者
-- 自动赎回质押的RWA代币
-- 完成借贷周期
+#### 4. Repayment Redemption (repay)
+- Landlord repays USDC to all lenders
+- Automatically redeem staked RWA tokens
+- Complete lending cycle
 
-### 21步完整交易流程
-1. **线下合规阶段（1-4步）**：门店审核 → 合同签订 → 数据录入 → RWAKey生成
-2. **AI代币化阶段（5-14步）**：用户输入 → AI处理 → 合约调用 → Functions查询 → 代币铸造
-3. **DeFi借贷阶段（15-18步）**：代币质押 → 价格估值 → 流动性提供 → 资金转移
-4. **还款赎回阶段（19-21步）**：USDC还款 → 自动分配 → 代币赎回
+### 21-Step Complete Transaction Process
+1. **Offline Compliance Stage (Steps 1-4)**: Store audit → Contract signing → Data entry → RWAKey generation
+2. **AI Tokenization Stage (Steps 5-14)**: User input → AI processing → Contract call → Functions query → Token minting
+3. **DeFi Lending Stage (Steps 15-18)**: Token staking → Price valuation → Liquidity provision → Fund transfer
+4. **Repayment Redemption Stage (Steps 19-21)**: USDC repayment → Automatic distribution → Token redemption
 
-## 🛡️ 安全特性
+## 🛡️ Security Features
 
-- **线下合规保障**: 真实合同签订，法律风险低
-- **重入攻击保护**: 使用OpenZeppelin的ReentrancyGuard
-- **权限控制**: 基于角色的访问控制，只有授权发行者可铸造代币
-- **价格预言机**: Chainlink去中心化价格源，防止价格操纵
-- **加密存储**: DON网络安全存储API密钥
-- **参数验证**: AI代理智能验证钱包地址和RWAKey格式
-- **多重签名**: 支持多方出借者的复杂借贷逻辑
+- **Offline Compliance Guarantee**: Real contract signing, low legal risk
+- **Reentrancy Attack Protection**: Uses OpenZeppelin's ReentrancyGuard
+- **Access Control**: Role-based access control, only authorized issuers can mint tokens
+- **Price Oracle**: Chainlink decentralized price source, prevents price manipulation
+- **Encrypted Storage**: DON network securely stores API keys
+- **Parameter Validation**: AI agent intelligently validates wallet address and RWAKey format
+- **Multi-signature**: Supports complex lending logic for multiple lenders
 
-## �️ 技术架构详解
+## 🏗️ Technical Architecture Details
 
-### 智能合约架构
+### Smart Contract Architecture
 ```
-ERC1155Core (基础合约)
+ERC1155Core (Base Contract)
     ↓
-RealRentToken (房租代币)
+RealRentToken (Rental Token)
     ↓
-RentIssuer (代币发行) ←→ Chainlink Functions
+RentIssuer (Token Issuance) ←→ Chainlink Functions
     ↓
-RentLending (DeFi借贷) ←→ Chainlink Price Feeds
+RentLending (DeFi Lending) ←→ Chainlink Price Feeds
 ```
 
-### AI代理架构
+### AI Agent Architecture
 ```
 ElizaOS Framework
     ↓
-getRwaPlugin (RWA插件)
+getRwaPlugin (RWA Plugin)
     ↓
 Actions: getRwa → lendRwa → lendUsdc → repay
     ↓
 Multi-Platform: CLI + Twitter + HTTP API
 ```
 
-### 数据流架构
+### Data Flow Architecture
 ```
-线下门店 → Supabase数据库 → Chainlink Functions → 智能合约 → AI代理 → 用户
+Offline Store → Supabase Database → Chainlink Functions → Smart Contract → AI Agent → User
 ```
 
-## �🌐 支持的网络
+## 🌐 Supported Networks
 
-- **Avalanche Fuji** (测试网) - 主要部署网络
-- **EVM兼容网络** - 可扩展到其他链
-- **跨链支持** - 为未来CCIP集成预留接口
+- **Avalanche Fuji** (Testnet) - Primary deployment network
+- **EVM-Compatible Networks** - Expandable to other chains
+- **Cross-Chain Support** - Reserved interface for future CCIP integration
 
-## 📄 许可证
+## 📄 License
 
 MIT License
 
-## ⚠️ 免责声明
+## ⚠️ Disclaimer
 
-这是一个示例项目，使用了硬编码值以便演示。请勿在生产环境中使用未经审计的代码。
+This is an example project using hardcoded values for demonstration purposes. Do not use unaudited code in production environments.
 
-## 🤝 贡献
+## 🤝 Contributing
 
-欢迎提交Issue和Pull Request来改进项目。
+Welcome to submit Issues and Pull Requests to improve the project.
 
-## 📞 联系方式
+## 📞 Contact
 
-如有问题或建议，请通过GitHub Issues联系我们。
+For questions or suggestions, please contact us through GitHub Issues.
+
+---
+
+## 🎯 Hackathon Information
+
+**Chromion Chainlink Hackathon 2025**
+*Building the Future, Onchain*
+
+### Target Prize Tracks
+- **Onchain Finance ($50,000)**: Real estate tokenization and DeFi lending
+- **ElizaOS DeFi Agents ($16,500)**: AI agent-driven DeFi interactions
+- **Avalanche Track ($10,000)**: Deployed on Avalanche network
+- **Chainlink Grand Prize ($35,000)**: Deep integration of Functions and Price Feeds
+
+### Key Innovation Points
+1. **Compliance Assurance**: Offline store auditing, low legal risk
+2. **User Experience Revolution**: Natural language replaces complex operations
+3. **Complete Technology Stack**: AI + Blockchain + Oracle
+4. **Real Problem Solving**: Genuine demand for rental liquidity
+
+### Demo Links
+- **Smart Contracts**: Deployed on Avalanche Fuji Testnet
+- **AI Agent**: ElizaOS-based multi-platform support
+- **Documentation**: Complete technical documentation and presentation materials
+
+---
+
+*RentRWA - Making real estate investment as simple as chatting!*
