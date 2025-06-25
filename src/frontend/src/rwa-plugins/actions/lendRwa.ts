@@ -101,7 +101,6 @@ export class LendRwaAction {
                 data: rentLendingReceipt.logs[0].data,
                 topics: rentLendingReceipt.logs[0].topics, // Add topics to the decoded event
             })
-            const amountRwa = decodedEvents.args.amountRwa;
             const amountUsdc = decodedEvents.args.amountUsdc;
 
             return {
@@ -111,7 +110,7 @@ export class LendRwaAction {
                 value: parseEther("0"),
                 data: "0x",
                 tokenId:params.tokenId,
-                amountRwa: Number(amountRwa),
+                amountRwa: Number(amount),
                 amountUsdc: Number(amountUsdc),
             };
         } catch (error) {
@@ -176,7 +175,7 @@ export const lendRwaAction: Action = {
             const callFunctionResp = await action.lendRwa(lendRwaParams);
             if (callback) {
                 callback({
-                    text: `Successfully called lendRWA with tokenId ${callFunctionResp.tokenId} , \n the amount of RWA to lend: ${callFunctionResp.amountRwa},\n the amount of USDC to get:${callFunctionResp.amountUsdc}`,
+                    text: `Successfully called lendRWA with tokenId ${callFunctionResp.tokenId} , \n the amount of RWA to lend: ${callFunctionResp.amountRwa},\n the amount of USDC to get: ${callFunctionResp.amountUsdc}`,
                     content: {
                         success: true,
                         hash: callFunctionResp.hash,
