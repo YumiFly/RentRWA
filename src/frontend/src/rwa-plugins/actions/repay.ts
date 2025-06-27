@@ -131,6 +131,17 @@ export const repayAction: Action = {
         state = state ? await runtime.updateRecentMessageState(state) : await runtime.composeState(message);
 
         const walletProvider = await initWalletProvider(runtime);
+
+         // Prefer twitterUserName as xid if available, otherwise fallback to xid
+        const xid = (state as any).twitterUserName;
+        if (xid) {
+            try {
+                await walletProvider.switchAccountByXid(xid);
+                console.log(`🔑 Switched wallet account for xid: ${xid}`);
+            } catch (e) {
+                console.error(`⚠️ Failed to switch account by xid ${xid}:`, e);
+            }
+        }
         const action = new RepayAction(walletProvider);
 
         const params = await generateObjectDeprecated({

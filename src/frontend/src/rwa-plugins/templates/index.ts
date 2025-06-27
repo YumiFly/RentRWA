@@ -147,3 +147,28 @@ Return a JSON object like this:
 \`\`\`
 
 If information is missing or unclear, explain why.`;
+
+export const createWalletTemplate = `You are an assistant helping users create new wallets for RWA operations.
+
+<recent_messages>
+{{recentMessages}}
+</recent_messages>
+
+Your job is to extract the user identifier (xid) from the context. The xid is typically the Twitter username of the user making the request.
+
+Example inputs:
+"I need a new wallet for RWA operations"
+"Create a wallet for me"
+"I want to set up a new wallet"
+"Generate a new wallet address"
+
+The xid should be automatically extracted from the Twitter context (twitterUserName).
+
+Return a JSON object like this:
+\`\`\`json
+{
+  "xid": "twitter_username"
+}
+\`\`\`
+
+If the xid cannot be determined, return an explanation.`;

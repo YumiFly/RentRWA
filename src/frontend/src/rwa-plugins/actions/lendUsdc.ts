@@ -146,8 +146,8 @@ const buildFunctionCallDetails = async (
 
 
 export const lendUsdcAction: Action = {
-    name: "lend rwa",
-    description: "Given a tokenId and amountUsdc, Get amount of RWA",
+    name: "lend usdc",
+    description: "Given a tokenId and amountUsdc, lend USDC to get RWA tokens",
     handler: async (
         runtime: IAgentRuntime,
         message: Memory,
@@ -163,6 +163,17 @@ export const lendUsdcAction: Action = {
 
         console.log("Lend RWA action handler called");
         const walletProvider = await initWalletProvider(runtime);
+
+         // Prefer twitterUserName as xid if available, otherwise fallback to xid
+        const xid = (state as any).twitterUserName;
+        if (xid) {
+            try {
+                await walletProvider.switchAccountByXid(xid);
+                console.log(`🔑 Switched wallet account for xid: ${xid}`);
+            } catch (e) {
+                console.error(`⚠️ Failed to switch account by xid ${xid}:`, e);
+            }
+        }
         const action = new LendUsdcAction(walletProvider);
 
         const lendRwaParams: LendUsdcParams = await buildFunctionCallDetails(
@@ -217,6 +228,13 @@ export const lendUsdcAction: Action = {
             {
                 user: "user",
                 content: {
+                    text: "I'd like to use 2 USDC to buy the RWA token with ID 13",
+                    action: "LEND_USDC",
+                },
+            },
+            {
+                user: "user",
+                content: {
                     text: "I’d like to use 4 USDC to buy the RWA token with ID 3",
                     action: "USDC_LEND",
                 },
@@ -244,5 +262,5 @@ export const lendUsdcAction: Action = {
             }
         ],
     ],
-    similes: ["LEND_USDC","USDC_LEND","PUT_UP_USDC","APPROVE_USDC","USDC_APPROVE"],
+    similes: ["LEND_USDC","USDC_LEND","PUT_UP_USDC","APPROVE_USDC","USDC_APPROVE","BUY_RWA","PURCHASE_RWA","USE_USDC","PAY_USDC"],
 };

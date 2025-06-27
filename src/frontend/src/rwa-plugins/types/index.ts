@@ -23,7 +23,18 @@ export interface LendUsdcParams {
 
 export interface RepayParams {
     tokenId: number; // in USDC
-    amountUsdc: number; 
+    amountUsdc: number;
+}
+
+export interface CreateWalletParams {
+    xid: string;
+}
+
+export interface CreateWalletResult {
+    xid: string;
+    address: `0x${string}`;
+    success: boolean;
+    message?: string;
 }
 
 export interface Transaction {

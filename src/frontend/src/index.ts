@@ -18,6 +18,7 @@ import { initializeDbCache } from "./cache/index.ts";
 import { character } from "./character.ts";
 import { startChat } from "./chat/index.ts";
 import { initializeClients } from "./clients/index.ts";
+// import { initSupabaseFromEnv } from "./utils/supabaseClient";
 import {
   getTokenForProvider,
   loadCharacters,
@@ -85,7 +86,7 @@ async function startAgent(character: Character, directClient: DirectClient) {
     if (!fs.existsSync(dataDir)) {
       fs.mkdirSync(dataDir, { recursive: true });
     }
-
+    //initSupabaseFromEnv(true); // debug = true 可打印初始化信息
     const db = initializeDatabase(dataDir);
 
     await db.init();

@@ -12,6 +12,7 @@ import type { Address, WalletClient, PublicClient, Chain, HttpTransport, Account
 import * as viemChains from "viem/chains";
 import NodeCache from "node-cache";
 import * as path from "path";
+import { createClient } from "@supabase/supabase-js";
 
 import type { SupportedChain } from "../types/index.ts";
 
@@ -22,18 +23,20 @@ export class WalletProvider {
   private CACHE_EXPIRY_SEC = 5;
   chains: Record<string, Chain> = { mainnet: viemChains.mainnet };
   account: PrivateKeyAccount;
+  private runtime?: IAgentRuntime;
 
   constructor(
     accountOrPrivateKey: PrivateKeyAccount | `0x${string}`,
     private cacheManager: ICacheManager,
-    chains?: Record<string, Chain>
+    chains?: Record<string, Chain>,
+    runtime?: IAgentRuntime
   ) {
     if (typeof accountOrPrivateKey === "string") {
       this.account = privateKeyToAccount(accountOrPrivateKey);
     } else {
       this.account = accountOrPrivateKey;
     }
-    // this.setAccount(accountOrPrivateKey);
+    this.runtime = runtime;
     this.setChains(chains);
 
     if (chains && Object.keys(chains).length > 0) {
@@ -129,6 +132,59 @@ export class WalletProvider {
       this.addChain({ [chainName]: chain });
     }
     this.setCurrentChain(chainName);
+  }
+
+  /**
+   * Dynamically switch the active account by querying Supabase.
+   * The `wallet_shadow` table is expected to contain: { xid: string, private_key: text }
+   *
+   * @param xid - unique identifier of the wallet row (e.g. user id)
+   * @throws Error if no record or `private_key` is missing
+   */
+  async switchAccountByXid(xid: string): Promise<void> {
+    if (!this.runtime) {
+      throw new Error("Runtime is not available. Cannot access Supabase.");
+    }
+
+    // Get Supabase credentials from runtime settings
+    const supabaseUrl = this.runtime.getSetting("SUPABASE_URL");
+    const supabaseAnonKey = this.runtime.getSetting("SUPABASE_ANON_KEY");
+
+    if (!supabaseUrl || !supabaseAnonKey) {
+      throw new Error("SUPABASE_URL and SUPABASE_ANON_KEY must be configured");
+    }
+
+    // Create Supabase client
+    const supabase = createClient(supabaseUrl, supabaseAnonKey);
+
+    try {
+      const { data, error } = await supabase
+        .from("wallet_shadow")
+        .select("private_key")
+        .eq("xid", xid)
+        .single();
+
+      if (error || !data?.private_key) {
+        throw new Error(
+          `Could not load private key for xid=${xid}: ` +
+            (error?.message ?? "no record found"),
+        );
+      }
+
+      if (!data.private_key.startsWith("0x")) {
+        throw new Error("Private key must start with 0x");
+      }
+
+      // Update runtime account in‑place
+      this.setAccount(data.private_key as `0x${string}`);
+
+      elizaLogger.info(`Successfully switched to account for xid: ${xid}`);
+      elizaLogger.info(`New wallet address: ${this.getAddress()}`);
+
+    } catch (error) {
+      elizaLogger.error(`Error switching account for xid ${xid}:`, error);
+      throw error;
+    }
   }
 
   private async readFromCache<T>(key: string): Promise<T | null> {
@@ -252,7 +308,7 @@ export const initWalletProvider = async (runtime: IAgentRuntime) => {
     throw new Error("EVM_PRIVATE_KEY must start with 0x");
   }
 
-  return new WalletProvider(privateKey, runtime.cacheManager, chains);
+  return new WalletProvider(privateKey, runtime.cacheManager, chains, runtime);
 };
 
 export const evmWalletProvider: Provider = {
